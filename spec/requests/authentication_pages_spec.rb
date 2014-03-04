@@ -9,6 +9,8 @@ describe "Authentication" do
 
 	    it { should have_content('Sign in') }
 	    it { should have_title('Sign in') }
+	    it { should_not have_link('Profile') }
+	    it { should_not have_link('Settings') }
 	end
 
 	describe "signin" do
@@ -19,6 +21,8 @@ describe "Authentication" do
 
 			it { should have_title('Sign in') }
 			it { should have_selector('div.alert.alert-error') }
+			it { should_not have_link('Profile') }
+			it { should_not have_link('Settings') }
 
 			describe "after visiting another page" do
 				before { click_link "Home" }
@@ -40,6 +44,8 @@ describe "Authentication" do
 			describe "followed by signout" do
 				before { click_link "Sign out" }
 				it { should have_link('Sign in') }
+				it { should_not have_link('Profile') }
+				it { should_not have_link('Settings') }
 			end
 		end
 	end
@@ -52,15 +58,25 @@ describe "Authentication" do
 			describe "when attempting to visit a protected page" do
 				before do
 					visit edit_user_path(user)
-					fill_in "Email",    with: user.email
-					fill_in "Password", with: user.password
-					click_button "Sign in"
+					sign_in user
 				end
 
 				describe "after signing in" do
 
 					it "should render the desired protected page" do
 						expect(page).to have_title('Edit user')
+					end
+
+					describe "when signing in again" do
+						before do
+							click_link "Sign out"
+							visit signin_path
+							sign_in user
+						end
+
+						it "should render the default (profile) page" do
+							expect(page).to have_title(user.name)
+						end
 					end
 				end
 			end
@@ -110,6 +126,22 @@ describe "Authentication" do
 			describe "submitting a DELETE request to the Users#destroy action" do
 				before { delete user_path(user) }
 				specify { expect(response).to redirect_to(root_url) }
+			end
+
+			describe "submitting to the Users#new actions" do
+				before { get new_user_path }
+				specify { expect(response).to redirect_to(root_url) }
+			end
+		end
+
+		describe "as admin" do
+			let(:admin) { FactoryGirl.create(:admin) }
+			before { sign_in admin, no_capybara: true }
+				
+			it "should not be able to delete itself" do
+				expect do
+					delete user_path(admin)
+				end.not_to change(User, :count).by(-1)
 			end
 		end
 	end
