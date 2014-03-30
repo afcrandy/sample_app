@@ -145,7 +145,7 @@ describe User do
 	    it "should be invalid" do
 	    	usernames = ['hello*', 'hello-', 'hello=', 'hello(',
 	    				 'hello&', 'hello@', 'hello!', 'hello"',
-	    				 'hel lo']
+	    				 'hel lo', 'admin']
 	    	usernames.each do |invalid_uname|
 	    		@user.username = invalid_uname
 	    		expect(@user).not_to be_valid
