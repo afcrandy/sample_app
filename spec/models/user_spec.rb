@@ -4,7 +4,8 @@ describe User do
   
 	before do
 		@user = User.new(name: "Example User", email: "user@example.com",
-						password: "foobar", password_confirmation: "foobar")
+						password: "foobar", password_confirmation: "foobar",
+						username: "example_user")
 	end
 
 	subject { @user }
@@ -17,6 +18,7 @@ describe User do
 	it { should respond_to(:remember_token) }
 	it { should respond_to(:authenticate) }
 	it { should respond_to(:admin) }
+	it { should respond_to(:username) }
 	it { should respond_to(:microposts) }
 	it { should respond_to(:feed) }
 	it { should respond_to(:relationships) }
@@ -30,6 +32,7 @@ describe User do
 	it { should be_valid }
 	it { should_not be_admin }
 
+
 	describe "with admin attribute set to 'true'" do
 		before do
 			@user.save!
@@ -38,6 +41,7 @@ describe User do
 
 		it { should be_admin }
 	end
+
 
 	describe "when name is not present" do
 		before { @user.name = " " }
@@ -76,7 +80,6 @@ describe User do
 		end
 	end
 
-
 	describe "when email address is already taken" do
 		before do
 			user_with_same_email = @user.dup
@@ -87,10 +90,11 @@ describe User do
 		it { should_not be_valid }
 	end
 
+
 	describe "when password is not present" do
 		before do
 			@user = User.new(name: "Example User", email: "user@example.com",
-						password: " ", password_confirmation: " ")
+						password: " ", password_confirmation: " ", username: "example_user")
 		end
 		it { should_not be_valid }
 	end
@@ -121,6 +125,63 @@ describe User do
 		it { should be_invalid }
 	end
 
+
+	describe "when username is not present" do
+	    before { @user.username = " " }
+	    it { should_not be_valid }
+	end
+
+	describe "when username is too short" do
+	    before { @user.username = "aaa" }
+	    it { should_not be_valid }
+	end
+
+	describe "when username is too long" do
+	    before { @user.username = "a" * 19 }
+	    it { should_not be_valid }
+	end
+
+	describe "when username is invalid" do
+	    it "should be invalid" do
+	    	usernames = ['hello*', 'hello-', 'hello=', 'hello(',
+	    				 'hello&', 'hello@', 'hello!', 'hello"',
+	    				 'hel lo']
+	    	usernames.each do |invalid_uname|
+	    		@user.username = invalid_uname
+	    		expect(@user).not_to be_valid
+	    	end
+	    end
+	end
+
+	describe "when username is valid" do
+	    it "should be valid" do
+	    	usernames = ['hello', 'hel_lo', 'hello9']
+	    	usernames.each do |valid_uname|
+	    		@user.username = valid_uname
+	    		expect(@user).to be_valid
+	    	end
+	    end
+	end
+
+	describe "when username is already taken" do
+	    before do
+	    	user_with_same_uname = @user.dup
+			user_with_same_uname.username = @user.username.upcase
+			user_with_same_uname.save
+	    end
+	    it { should_not be_valid }
+	end
+
+	describe "username with mixed case" do
+	    let(:mixed_case_uname) { "HeLlO" }
+	    it "should be saved as lower-case" do
+	    	@user.username = mixed_case_uname
+	    	@user.save
+	    	expect(@user.reload.username).to eq mixed_case_uname.downcase
+	    end
+	end
+
+
 	describe "email address with mixed case" do
 		let(:mixed_case_email) { "Foo@ExAMPle.CoM" }
 
@@ -131,10 +192,12 @@ describe User do
 		end
 	end
 
+
 	describe "remember token" do
 		before { @user.save }
 		its(:remember_token) { should_not be_blank }
 	end
+
 
 	describe "micropost associations" do
 
@@ -180,6 +243,7 @@ describe User do
 			end
 		end
 	end
+
 
 	describe "following" do
 	    let(:other_user) { FactoryGirl.create(:user) }

@@ -124,6 +124,17 @@ describe "User pages" do
 		        end
 		    end
 		end
+
+		describe "follower/following counts" do
+		    let(:other_user) { FactoryGirl.create(:user) }
+		    before do
+		    	other_user.follow!(user)
+		    	visit user_path(user)
+		    end
+
+		    it { should have_link("0 following", href: following_user_path(user)) }
+		    it { should have_link("1 followers", href: followers_user_path(user)) }
+		end
 	end
 
 	describe "signup page" do
@@ -147,6 +158,7 @@ describe "User pages" do
 			before do
 				fill_in "Name",             with: "Example User"
 				fill_in "Email",            with: "user@example.com"
+				fill_in "Username",         with: "example_user"
 				fill_in "Password",         with: "foobar"
 				fill_in "Confirm Password", with: "foobar"
 			end
@@ -191,6 +203,7 @@ describe "User pages" do
 			before do
 				fill_in "Name",             with: new_name
 				fill_in "Email",            with: new_email
+				fill_in "Username",         with: user.username
 				fill_in "Password",         with: user.password
 				fill_in "Confirm Password", with: user.password
 				click_button "Save changes"

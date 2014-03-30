@@ -7,7 +7,7 @@ class User < ActiveRecord::Base
 									 dependent:   :destroy
 	has_many :followers, through: :reverse_relationships, source: :follower
 
-	before_save { email.downcase! }
+	before_save :lower_attrs
 	before_create :create_remember_token
 
 	validates :name,  presence: true, length: { maximum: 50 }
@@ -16,6 +16,9 @@ class User < ActiveRecord::Base
 						uniqueness: { case_sensitive: false }
 	has_secure_password
 	validates :password, length: { minimum: 6 }
+	VALID_UNAME_REGEX = /\A[a-z0-9_]{4,18}\z/i
+	validates :username, presence: true, length: 4..18, uniqueness: { case_sensitive: false },
+						format: { with: VALID_UNAME_REGEX }, exclusion: { in: ["admin"] }
 
 	def User.new_remember_token
 		SecureRandom.urlsafe_base64
@@ -46,5 +49,10 @@ class User < ActiveRecord::Base
 
 		def create_remember_token
 			self.remember_token = User.encrypt(User.new_remember_token)
+		end
+
+		def lower_attrs
+			email.downcase!
+			username.downcase!
 		end
 end
