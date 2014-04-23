@@ -1,0 +1,33 @@
+The Sample App:
+  The app from the Ruby on Rails tutorial by Michael Hartl. Plus suggested and original extensions
+
+   So far:
+     ☐ Has standard static pages
+     ☐ User signup, signin, and authorization capabilities
+     ☐ Micropost facility, and the ability to follow and unfollow other users
+     ☐ Created an email notification facility for when a user follows another
+
+      Follower Notification:
+        ☐ Finish and touch up the email that gets sent out .\notification.html.erb
+        ☐ Modify the Mailer code to handle different formats .\follower_notification_mailer.rb
+        ✔ Make this notification optional @done (14-04-22 18:46)
+        ☐ Research ways to have the mailing code run in a background task
+
+      Twitter Replies:
+        ☐ Give the Microposts model an 'in_reply_to' attribute
+        ☐ Use a Regex to determine the intended recipient '/\A@(\W+)/i'
+        ☐ Then use an if clause in the micropost controller, similar to the method for Messages:
+            ☐ To identify if the post is intended as a reply
+            ☐ To store the name using the '$1' variable to extract the match to the Regex above
+        ☐ Store the user_id of this user in the in_reply_to attribute for the Micropost
+        ☐ Find some way to include these replies in a user's profile
+            ☐ perhaps as part of the feed? Decide on the design first
+        ☐ Place into the SQL in .\micropost.rb a request for posts "where in_reply_to = user_id"
+        ☐ And "where in_reply_to IN (#{followed_user_ids})"
+
+      Messages:
+        ☐ Have a Regex in the controller for Micropost creation that identifies:
+            ☐ /\Ad (\W+)/i - to isolate the 'd' at the beginning and the user name
+            ☐ Use $1 again to compare to possible usernames
+        ☐ Create the Message model
+        ☐ Needs the interface to messages to be designed first

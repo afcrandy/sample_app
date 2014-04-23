@@ -8,6 +8,7 @@ describe User do
 						username: "example_user")
 	end
 
+	let(:second_user) { FactoryGirl.create(:user) }
 	subject { @user }
 
 	it { should respond_to(:name) }
@@ -18,6 +19,7 @@ describe User do
 	it { should respond_to(:remember_token) }
 	it { should respond_to(:authenticate) }
 	it { should respond_to(:admin) }
+	it { should respond_to(:notifications) }
 	it { should respond_to(:username) }
 	it { should respond_to(:microposts) }
 	it { should respond_to(:feed) }
@@ -31,6 +33,7 @@ describe User do
 
 	it { should be_valid }
 	it { should_not be_admin }
+	it { should be_notifications }
 
 
 	describe "with admin attribute set to 'true'" do
@@ -40,6 +43,25 @@ describe User do
 		end
 
 		it { should be_admin }
+	end
+
+
+	describe "with notifications attribute set to 'false'" do
+	    before(:each) do
+	    	ActionMailer::Base.perform_deliveries = true
+	    	@user.save!
+	    	@user.toggle!(:notifications)
+	    end
+
+	    after(:each) do
+	    	ActionMailer::Base.deliveries = []
+	    end
+
+	    it "should not send a new follower notification email" do
+	    	expect do
+			    second_user.follow!(@user)
+		    end.not_to change(ActionMailer::Base.deliveries, :count).by(1)
+	    end
 	end
 
 

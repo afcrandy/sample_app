@@ -216,6 +216,14 @@ input {
 	@extend .error;
 }
 
+#follower-notifications {
+	margin-top: 15px;
+	margin-bottom: 15px;
+	div {
+		float: right;
+	}
+}
+
 
 /* Users index */
 
